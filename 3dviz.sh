@@ -32,19 +32,16 @@ proj() {
     echo "$(( 40+(4000*$1)/(100*($3+200)))) $(( 20+(2000*$2)/(100*($3+200))))"
 }
 rot () {
-    cx=$(cos $ax)
-    sx=$(sin $ax)
-    cy=$(cos $ay)
-    sy=$(sin $ay)
-    cz=$(cos $az)
-    sz=$(sin $az)
-    x=$((($1*(cy*cz/100-sx*sy*sz/10000) + $2*(sx*sy*cz/10000+sy*cy/100) - $3*sy*cx/100)/100))
-    y=$(((-$1*sz*cx/100 + $2*cx*cz/100 + $3*sx)/100))
-    z=$((($1*(sx*sz*cy/10000+sy*cz/100) + $2*(sy*sz/100-sx*cy*cz/10000) + $3*cx*cy/100)/100))
+    cf=$(cos $ax)
+    sf=$(sin $ax)
+    ct=$(cos $ay)
+    st=$(sin $ay)
+    cp=$(cos $az)
+    sp=$(sin $az)
+    x=$((( $1*ct*cp/100 + $2*(sf*st*cp/10000-cf*sp/100) + $3*(sf*sp/100+cf*st*cp/10000) )/100))
+    y=$((( $1*ct*sp/100 + $2*(cf*cp/100+sf*st*sp/10000) + $3*(cf*st*sp/10000-sf*cp/100) )/100))
+    z=$(((-$1*st        + $2* sf*ct/100                 + $3* cf*ct/100                 )/100))
     echo "$x $y $z"
-    # only correct for x rotation, problem for y and z: sheering
-    #x=$(((x*cy - z*sy) / 100))
-    #z=$(((x*sy + z*cy) / 100))
 }
 declare -a lutsincos # stores a LUT for cosine and sine functions
 load_sin # loads the LUT with sine values normalized as: sine([0;255])=[0;255], period is 256
@@ -74,11 +71,14 @@ declare -a P
 while true; do
     clear
     for i in ${!V[@]}; do
-        P[$i]=$(proj $(rot ${V[$i]}))
+        plot $(proj $(rot ${V[$i]})) []
     done
-    for i in ${!P[@]}; do
-        plot ${P[$i]} []
-    done
+    #for i in ${!V[@]}; do
+    #    P[$i]=$(proj $(rot ${V[$i]}))
+    #done
+    #for i in ${!P[@]}; do
+    #    plot ${P[$i]} []
+    #done
     read -n1 key
     case $key in 
         q) ((ay+=5)) ;;
