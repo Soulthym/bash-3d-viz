@@ -32,9 +32,19 @@ proj() {
     echo "$(( 40+(4000*$1)/(100*($3+200)))) $(( 20+(2000*$2)/(100*($3+200))))"
 }
 rot () {
+    cx=$(cos $ax)
+    sx=$(sin $ax)
     cy=$(cos $ay)
     sy=$(sin $ay)
-    echo "$((($1*cy - $3*sy) / 100)) $2 $((($1*sy + $3*cy) / 100))"
+    cz=$(cos $az)
+    sz=$(sin $az)
+    x=$((($1*(cy*cz/100-sx*sy*sz/10000) + $2*(sx*sy*cz/10000+sy*cy/100) - $3*sy*cx/100)/100))
+    y=$(((-$1*sz*cx/100 + $2*cx*cz/100 + $3*sx)/100))
+    z=$((($1*(sx*sz*cy/10000+sy*cz/100) + $2*(sy*sz/100-sx*cy*cz/10000) + $3*cx*cy/100)/100))
+    echo "$x $y $z"
+    # only correct for x rotation, problem for y and z: sheering
+    #x=$(((x*cy - z*sy) / 100))
+    #z=$(((x*sy + z*cy) / 100))
 }
 declare -a lutsincos # stores a LUT for cosine and sine functions
 load_sin # loads the LUT with sine values normalized as: sine([0;255])=[0;255], period is 256
